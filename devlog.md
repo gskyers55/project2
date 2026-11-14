@@ -50,7 +50,7 @@ Things I expect to go wrong: Customers might select the same teller, threads mig
 
 
 
-Nov 12 23:45 
+> Nov 12 23:45 
 
 The 3 teller threads and the customer threads are now done for the introduction handshake and the process goes: a customer waits in line, picks a ready teller, introduces itself, and the teller prints that it is serving that customer. I tested this with 3 customers first, and then with 10, and ran those 10 times each, all of which finished and printed with the closing lines. 
 
@@ -69,6 +69,30 @@ Plans for next session:
 
 rest of the conversation, being that the teller asks for the transaction, customer tells it, teller completes it, and tells the customer, and customer leaves. Hopefully get that working with 5 to 10 customers before adding the door, safe, and manager.
 
-Session 1 End
+### Session 1 End
+
+
+### Session 2 Begin
+
+> Nov 12 11:22
+
+to start, the thing that is missing from the handshake is that the teller currently moves on without the customer ever saying what it wants, and the teller has to wait for the customer to give the transaction, and the customer has to wait for the teller to finish. So I need to expand it to have the teller ask for the transaction type, then the customer responds, and then the tellers completes the interaction before the customer leaves 
+
+Ill need to add some additional semaphores to coordinate a few things
+- Transaction Request: Signals that the teller is ready to receive the customer's transaction
+- Transaction response: Signals that the customer has provided their transaction type
+- Transaction completion: Signals that the teller has finished and the customer can leave. 
+
+The customer and teller must wait for the appropriate signals so neither moves ahead too early
+
+Semaphores aren't enough by themselves because they only signal when something can happen, and the actual transaction type (deposit or withdrawal) needs to be stored in a shared variable. Each teller should have its own transaction variable so customers assigned to different tellers don't overwrite each other's information, and since the assigned customer communicates through that teller's handshake, the information stays separate. 
+
+**Plans**
+
+- Complete the full customer-teller conversation
+- Keep the dorr, safe, manager, and simulated processing delays for Session 3
+- Test with 5 customers, then increase to 10
+- Check that every customer prints their complete sequence, from entering the interaction to leaving, without missing or overlapping steps. 
+
 
 
