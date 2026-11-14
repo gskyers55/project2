@@ -94,5 +94,25 @@ Semaphores aren't enough by themselves because they only signal when something c
 - Test with 5 customers, then increase to 10
 - Check that every customer prints their complete sequence, from entering the interaction to leaving, without missing or overlapping steps. 
 
+> Nov 12 13:18 
+
+Finished Session 2 with the teller and customer now have the full conversation, where the customer introduces itself, the teller asks for the transaction, the customer answers, the teller finishes and tells the customer, and the customer leaves before the teller calls the next one. All of which was tested with 3, 10, and 50 customers. 
+
+This took five semaphores per teller, each starting at 0 and each
+standing for one step: customer_arrived, ask_txn, txn_given, txn_done, and customer_left. The side that needs something calls acquire() and blocks, and the other side releases it when that step is done. Before writing it I predicted that without the last one, customer_left, the teller could print "ready to serve" and take a new customer while the old one was still leaving. The transaction type is passed through a shared slot per teller, current_transaction[tid]. I decided it needs no mutex because a teller only goes back on the ready list after customer_left,
+so only one customer can write to that slot at a time.
+
+I also changed when `served` is released. In Sesson 1 it fired right after the introduction, but now it fires after the customer leaves, so main cannot start closing the bank while someone is mid-transaction.
+
+I read one customer's lines in order and they went from "wants to perform" to "leaves the bank" with the teller's lines in between. Then I counted the lines in my output file: 10 each of "serving a customer", "finishes", and "leaves the bank", and 13 "ready to serve" for 10 customers plus 3 tellers. 
+
+I was initally reading output by eye which 190 some lines repeatedly was very slow and kinda hurting my eyes, so I made a checker script `check_runs.py` that runs the program many times and checks each run for hangs, crashes, each thread's sequence of lines, and the order between a customer and its teller. It passed 50 out of 50 runs for 10 customers, then 20/20 for 50 customers. The first version missed a deliberately broken handshake because it only check each thread's own lines, the the order between the threads, so adding cross-thread checks fixed that, and a pass only means no problem showed up in those runs, since it is still possible for a race race to exist. 
+
+**Plans** 
+
+next session i will add the sleeps, the door (2 at a time), the safe (2 tellers), and the manager, (1 teller, withdrawals only), plus the three line patterm for each shared resource in which i expect the safe and manager to be where deadlock risk comes in, so I want to take into consideration the order the tellers acquire them. 
+
+### Session 2 End
+
 
 
