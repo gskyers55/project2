@@ -9,7 +9,7 @@ print_lock = threading.Semaphore(1)
 mutex = threading.Semaphore(1)
 
 # Shared resources
-door = threading.Semaphore(2)           # only 2 customers through the door at a time
+door = threading.Semaphore(2)           # only 2 customers through the door at a time. 
 safe = threading.Semaphore(2)           # only 2 tellers in the safe at a time
 manager = threading.Semaphore(1)        # only 1 teller talks to the manager at a time
 
