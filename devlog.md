@@ -114,5 +114,25 @@ next session i will add the sleeps, the door (2 at a time), the safe (2 tellers)
 
 ### Session 2 End
 
+### Session 3 Begin
+
+> Nov 12 14:17
+
+the goal for today is to add the sleeps, the three shared resources and the opening gate
+
+door, safe, and manager are semaphores starting at 2, 2, and 1. The opening gate is a semaphore starting at 0 that the third ready teller releases.
+
+A teller may need both the manager and the safe, so acquiring them in the wrong order could cause deadlock if tellers hold one resource while waiting for another. To avoid this, I'll have tellers acquire the manager first (when needed) and release it before acquiring the safe. This prevents them from holding one resource while waiting for the other
+
+Customers should not hold the door semaphore while waiting in line. Doing so could prevent other customers from entering or leaving the bank, creating unnecessary congestion. They should release the door after entering
+
+The maximum number of tellers inside the safe at once should be two, because the safe semaphore starts at 2.
+
+Withdrawals should take longer overall than deposits because withdrawals require an additional interaction with the manager, while deposits can go directly to the safe.
+
+The bank can wait for all three tellers using a counter that tracks how many tellers are ready. Once the counter reaches three, the third teller releases the opening gate, allowing customers to enter.
+
+
+
 
 
