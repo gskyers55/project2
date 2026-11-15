@@ -132,7 +132,21 @@ Withdrawals should take longer overall than deposits because withdrawals require
 
 The bank can wait for all three tellers using a counter that tracks how many tellers are ready. Once the counter reaches three, the third teller releases the opening gate, allowing customers to enter.
 
+ > Nov 12 5:47
 
+ I finished implementing the shared resources and synchronization. The bank now has a door (2 customers at a time), safe (2 tellers at a time), manager (1 teller at a time for withdrawals), random processing delays, and an opening gate that prevents customers from entering until all three tellers are ready.
 
+I tested the program with 3, 10, and 50 customers. The checker reported for 50 runs 50/50 and 20 for 20/20. It also confirmed that the maximum number of tellers using the safe was 2 and the maximum using the manager was 1.
 
+The biggest design concern was deadlock. I avoided this by making tellers release the manager before requesting the safe, preventing them from holding one resource while waiting for another.
+
+For the opening gate, I used a semaphore starting at 0 and a shared counter protected by a mutex. Once the third teller becomes ready, it releases the gate. Customers wait on the gate before entering. The door is only held while passing through, not while waiting in line.
+
+I expected withdrawals to take longer because they require an additional manager interaction, although I did somewhat measure this directly. One thing I noticed was that the order of printed messages changes between runs because the threads execute concurrently.
+
+I also identified some testing limitations: the opening gate and door limits cannot be fully verified through the current checker output, so I watched their implementation directly.
+
+Next session: Run more tests with 50 customers, compare the output with the sample run, write the README, and complete the final repository checks and zip.
+
+### Session 3 End
 
