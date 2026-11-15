@@ -3,10 +3,19 @@ import threading
 import time
 
 NUM_TELLERS = 3
-NUM_CUSTOMERS = 10   # test with 5, then 10
+NUM_CUSTOMERS = 50   # test with 10, then set to 50 for the final run
 
 print_lock = threading.Semaphore(1)
 mutex = threading.Semaphore(1)
+
+# Shared resources
+door = threading.Semaphore(2)           # only 2 customers through the door at a time
+safe = threading.Semaphore(2)           # only 2 tellers in the safe at a time
+manager = threading.Semaphore(1)        # only 1 teller talks to the manager at a time
+
+# Bank opening: the third teller to become ready releases this once
+bank_open = threading.Semaphore(0)
+tellers_ready_count = 0                 # protected by mutex
 
 ready_tellers = []                      # ids of tellers waiting for a customer
 teller_ready = threading.Semaphore(0)   # counts ready tellers; customers wait here (the "line")
@@ -33,9 +42,23 @@ def say(kind, ident, partner, msg):
     print_lock.release()
 
 
+def pause(low_ms, high_ms):
+    """Block for a random number of milliseconds."""
+    time.sleep(random.randint(low_ms, high_ms) / 1000)
+
+
 def teller(tid):
+    global tellers_ready_count
+    first_time = True
     while True:
         say("Teller", tid, "", "ready to serve")
+        if first_time:
+            first_time = False
+            mutex.acquire()
+            tellers_ready_count += 1
+            if tellers_ready_count == NUM_TELLERS:
+                bank_open.release()     # all three are ready: open the bank
+            mutex.release()
         say("Teller", tid, "", "waiting for a customer")
         mutex.acquire()
         ready_tellers.append(tid)
@@ -53,7 +76,22 @@ def teller(tid):
         txn_given[tid].acquire()            # wait until the customer has answered
         txn = current_transaction[tid]
         say("Teller", tid, who, f"handling {txn} transaction")
-        # Session 3: manager (withdrawals only), safe, and sleeps go here
+
+        if txn == "withdrawal":
+            say("Teller", tid, who, "going to the manager")
+            manager.acquire()
+            say("Teller", tid, who, "getting manager's permission")
+            pause(5, 30)
+            say("Teller", tid, who, "got manager's permission")
+            manager.release()               # let go of the manager BEFORE asking for the safe
+
+        say("Teller", tid, who, "going to safe")
+        safe.acquire()
+        say("Teller", tid, who, "enter safe")
+        pause(10, 50)
+        say("Teller", tid, who, "leaving safe")
+        safe.release()
+
         say("Teller", tid, who, f"finishes {txn} transaction.")
         say("Teller", tid, who, "wait for customer to leave.")
         txn_done[tid].release()             # tell the customer it's finished
@@ -64,9 +102,13 @@ def teller(tid):
 def customer(cid):
     transaction = random.choice(["deposit", "withdrawal"])
     say("Customer", cid, "", f"wants to perform a {transaction} transaction")
-    time.sleep(random.randint(0, 100) / 1000)
+    pause(0, 100)
+    bank_open.acquire()                     # nobody enters before the bank is open
+    bank_open.release()                     # ...and pass the "open" signal on to the next customer
     say("Customer", cid, "", "going to bank.")
+    door.acquire()
     say("Customer", cid, "", "entering bank.")
+    door.release()
     say("Customer", cid, "", "getting in line.")
     teller_ready.acquire()                  # blocks here until some teller is free
     mutex.acquire()
@@ -86,7 +128,9 @@ def customer(cid):
     say("Customer", cid, me, "leaves teller")
     customer_left[tid].release()
     say("Customer", cid, "", "goes to door")
+    door.acquire()
     say("Customer", cid, "", "leaves the bank")
+    door.release()
 
 
 def main():
