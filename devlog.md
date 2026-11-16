@@ -165,3 +165,33 @@ Finally, I'll review the repository against the assignment rubric, check that al
 
 **Final goal:** Have a working, tested, and properly documented project ready to zip and submit. 
 
+> Nov 12 20:39
+
+
+### What I Finished
+
+Completed full-size testing with 50 customers, wrote the README, and finished the final repository checks. I ran `check_runs.py` 10 times for each configuration (3, 10, and 50 customers), and all tests passed. The safe consistently allowed a maximum of 2 tellers, while the manager limit of 1 was never exceeded.
+
+### What I Checked
+
+I verified that the bank served all 50 customers, that all 50 eventually left, and that the tellers reported being ready as expected (53 total ready messages). The output also closely matched the course sample.
+
+### Problems and Limitations
+
+Nothing major went wrong during final testing. One challenge was completing the project on my phone using a mobile VS Code app. Git authentication required creating a personal access token  instead of using my normal password.
+
+I skipped the experiment of deliberately delaying a teller to test the opening gate, and verified the door implementation by reading the code instead. Passing the tests is reassuring, but it doesn't guarantee that every possible race condition has been eliminated.
+
+### Looking Back
+
+Compared to Project 1, threads communicate through shared variables rather than pipes, which introduces race conditions. Mutexes protect shared counters and lists, while semaphores control access to resources and coordinate hand-offs between customers and tellers.
+
+The most useful lesson was understanding how threads need to be stopped properly. The daemon thread crash in Session 1 taught me that threads need a clear shutdown mechanism rather than simply relying on the main program ending.
+
+The devlog and commit history also helped me keep track of changes and understand how the project developed across the four sessions.
+
+### Submission
+
+Finished the README, made the final commit, created the submission zip, and extracted it elsewhere to verify the files. I also checked `git log` and `git status` to confirm the repository was in order.
+
+### Session 4 End
