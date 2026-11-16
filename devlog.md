@@ -150,3 +150,18 @@ Next session: Run more tests with 50 customers, compare the output with the samp
 
 ### Session 3 End
 
+
+### Session 4 Begin 
+
+> Nov 12 20:02
+
+The main goal of this session is to make sure the complete bank simulation works as expected and follows the project specifications. I'll focus on running the program with all 50 customers multiple times to check for synchronization issues, deadlocks, or customers and tellers getting stuck.
+
+I'll also compare my program's output against the sample run provided with the assignment to make sure the messages follow the expected format and that the interactions happen in the correct order. I'll pay particular attention to the shared resources, making sure the safe and manager limits are never exceeded.
+
+Once testing is complete, I'll write the README explaining the project, how to run it, and how the threading and semaphore synchronization work.
+
+Finally, I'll review the repository against the assignment rubric, check that all required source files are included, remove any unnecessary files, and make sure the program can be run without additional setup issues.
+
+**Final goal:** Have a working, tested, and properly documented project ready to zip and submit. 
+
